@@ -30,7 +30,7 @@ var util = require('util');
 
 util.inherits(SelectStream, ObjectTransform);
 
-function SelectStream(opts) {
+function SelectStream(callback, opts) {
   var self = (this instanceof SelectStream)
            ? this
            : Object.create(SelectStream.prototype);
@@ -39,15 +39,22 @@ function SelectStream(opts) {
 
   ObjectTransform.call(self, opts);
 
-  // TODO: implement constructor
+  if (typeof callback !== 'function') {
+    throw new Error('SelectStream requires callback function');
+  }
+
+  self._callback = callback;
 
   return self;
 }
 
 SelectStream.prototype._reduce = function(msg, output, callback) {
-  // TODO: implement _reduce
+  if (this._callback(msg)) {
+    output(msg);
+  }
+  callback();
 };
 
 SelectStream.prototype._expand = function(ether, msg, output, callback) {
-  // TODO: implement _expand
+  return this._reduce(msg, output, callback);
 };

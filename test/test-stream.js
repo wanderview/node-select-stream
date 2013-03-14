@@ -25,9 +25,22 @@
 
 var SelectStream = require('../stream');
 
-module.exports.nop = function(test) {
+module.exports.select = function(test) {
   test.expect(1);
-  var sstream = new SelectStream();
-  test.ok(sstream instanceof SelectStream);
+
+  var sstream = new SelectStream(function(msg) {
+    return msg.name === 'foobar';
+  });
+
+  var bad = { name: 'snafu' };
+  var good = { name: 'foobar' };
+
+  sstream.write(bad);
+  sstream.write(good);
+
+  var output = sstream.read();
+
+  test.deepEqual(good, output);
+
   test.done();
 };
